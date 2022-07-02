@@ -3,10 +3,12 @@ module marusya
 go 1.18
 
 require (
+	github.com/alecthomas/kong v0.6.1
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/httplog v0.2.4
 	github.com/go-chi/render v1.0.1
+	github.com/joho/godotenv v1.4.0
 	github.com/rs/zerolog v1.27.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 )
