@@ -1,0 +1,12 @@
+[Unit]
+Description=Marusya server
+After=multi-user.target
+
+[Service]
+User=root
+Group=root
+ExecStart=/opt/marusya/marusya
+
+[Install]
+WantedBy=multi-user.target
+
