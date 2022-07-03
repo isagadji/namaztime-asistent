@@ -1,4 +1,4 @@
-package marusya
+package namaztime
 
 import (
 	"encoding/json"
@@ -41,11 +41,15 @@ func (t Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() { _ = r.Body.Close() }()
 
-	w.Header().Set("Access-Control-Allow-Headers", "DNT, Authorization, Origin, X-Requested-With, X-Host, X-Request-Id, Timing-Allow-Origin, Content-Type, Accept, Content-Range, Range, Keep-Alive, User-Agent, If-Modified-Since, Cache-Control, Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, GET, POST")
-	w.Header().Set("Access-Control-Allow-Origin", "https://debugger-web-client.marusia.mail.ru")
-	//w.Header().Set("Access-Control-Allow-Origin", "*")
-	//render.JSON(w, r, NewMarusyaResponse("привет", r))
-	render.JSON(w, r, NewMarusyaResponse("привет", request))
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	msg, err := t.service.GetNamazTimeFromCity(request)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	render.JSON(w, r, NewMarusyaResponse(msg, request))
 	return
 }

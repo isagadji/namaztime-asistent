@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"marusya/internal/marusya"
+	"marusya/internal/aladhan"
+	"marusya/internal/namaztime"
 
 	"github.com/alecthomas/kong"
 	"github.com/go-chi/chi/v5"
@@ -19,12 +20,12 @@ import (
 var ErrStopped = errors.New("stopped")
 
 type Server struct {
-	AppId    string `kong:"required,name=app-id,env=APP_ID"`
-	HTTPAddr string `kong:"required,name=http-addr,env=HTTP_ADDR"`
-	Aladhan  struct {
-		ApiHost string `kong:"required,name=aladhan-api-host,env=ALADHAN_API_HOST"`
-		ApiPath string `kong:"required,name=aladhan-api-path,env=ALADHAN_API_PATH"`
-	} `embed:""`
+	VkAppId   string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
+	MarusyaId string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
+	HTTPAddr  string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
+
+	Aladhan       aladhan.Flags `kong:"embed"`
+	PostgresFlags PostgresFlags `kong:"embed"`
 }
 
 func (s *Server) Run(kVars kong.Vars) error {
@@ -33,9 +34,14 @@ func (s *Server) Run(kVars kong.Vars) error {
 		LogLevel: "debug",
 		JSON:     true,
 	})
-
-	marusyaService := marusya.NewService()
-	transport := marusya.NewTransport(marusyaService, logger)
+	db, err := s.PostgresFlags.Init()
+	if err != nil {
+		return err
+	}
+	storage := namaztime.NewStorage(db)
+	aladhanService := s.Aladhan.Init()
+	marusyaService := namaztime.NewService(aladhanService, storage, logger)
+	transport := namaztime.NewTransport(marusyaService, logger)
 
 	gr, _ := errgroup.WithContext(context.Background())
 	gr.Go(func() error {
