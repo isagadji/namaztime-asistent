@@ -1,4 +1,4 @@
-package commands
+package extlib
 
 import (
 	"fmt"

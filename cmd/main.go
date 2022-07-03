@@ -2,19 +2,20 @@ package main
 
 import (
 	"marusya/cmd/commands"
+	"marusya/internal/extlib"
 
 	"github.com/alecthomas/kong"
 )
 
 const (
-	serviceName    = "marusya"
+	serviceName    = "namaztime"
 	serviceVersion = "0.1"
 )
 
 var cli struct {
 	Server commands.Server `kong:"cmd,help:'Run server'"`
 
-	EnvFile commands.ENVFileConfig `kong:"optional,name=env-file,default=.env,help='Path to .env file'"`
+	EnvFile extlib.ENVFileConfig `kong:"optional,name=env-file,default=.env,help='Path to .env file'"`
 }
 
 func main() {
@@ -22,7 +23,8 @@ func main() {
 		&cli,
 		kong.Name(serviceName),
 		kong.Vars{
-			"serviceName": serviceName,
+			"serviceName":    serviceName,
+			"serviceVersion": serviceVersion,
 		},
 		kong.UsageOnError(),
 	)

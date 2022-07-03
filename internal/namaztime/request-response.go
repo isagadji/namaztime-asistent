@@ -1,4 +1,62 @@
-package marusya
+package namaztime
+
+const (
+	namazTimeResponseTextTemplate = "До {{.Description}} намаза {{.TitleRu}} в {{.Time}}, осталось {{.TimeLeft}} минут"
+)
+
+func GetNamazTimeTitle(title, time string, timeLeft *string) *NamazTimeDto {
+	namazTime := TitleTranslateMap[title]
+	namazTime.TimeLeft = timeLeft
+	namazTime.Time = time
+
+	return namazTime
+}
+
+var TitleTranslateMap = map[string]*NamazTimeDto{
+	"Fajr": &NamazTimeDto{
+		Title:       "Fajr",
+		TitleRu:     "Фаджр",
+		Description: "устрений",
+		Time:        "",
+		TimeLeft:    nil,
+	},
+	"Dhuhr": &NamazTimeDto{
+		Title:       "Dhuhr",
+		TitleRu:     "Зухр",
+		Description: "обеденный",
+		Time:        "",
+		TimeLeft:    nil,
+	},
+	"Asr": &NamazTimeDto{
+		Title:       "Asr",
+		TitleRu:     "Аср",
+		Description: "послеобеденный",
+		Time:        "",
+		TimeLeft:    nil,
+	},
+	"Maghrib": &NamazTimeDto{
+		Title:       "Maghrib",
+		TitleRu:     "Магриб",
+		Description: "вечерний",
+		Time:        "",
+		TimeLeft:    nil,
+	},
+	"Isha": &NamazTimeDto{
+		Title:       "Isha",
+		TitleRu:     "Иша",
+		Description: "Ночной",
+		Time:        "",
+		TimeLeft:    nil,
+	},
+}
+
+type NamazTimeDto struct {
+	Title       string
+	TitleRu     string
+	Description string
+	Time        string
+	TimeLeft    *string
+}
 
 type MarusyaResponse struct {
 	//Данные для ответа пользователю.
@@ -11,19 +69,12 @@ type MarusyaResponse struct {
 	Version string `json:"version"`
 }
 
-func NewMarusyaResponse(msg string, r *MarusyaRequest) MarusyaResponse {
+func NewMarusyaResponse(msg *string, r *MarusyaRequest) MarusyaResponse {
 	return MarusyaResponse{
 		Response: Response{
-			Text: msg,
-			Tts:  msg,
-			Buttons: []*Button{&Button{
-				Title:   "",
-				Url:     "aas",
-				Payload: &Payload{},
-			}},
+			Text:       msg,
+			Tts:        msg,
 			EndSession: false,
-			Card:       &Card{},
-			Commands:   nil,
 		},
 		Session: Session{
 			SessionId: r.Session.SessionId,
@@ -54,15 +105,15 @@ type Response struct {
 	//Текст, который следует показать и сказать пользователю, максимум 1 024 символа. Не должен быть пустым.
 	//В тексте ответа можно указать переводы строк последовательностью «\n».
 	//Если передать массив строк, то сообщения разобьются на баблы.
-	Text string `json:"text"`
+	Text *string `json:"text"`
 
 	//Ответ в формате TTS (text-to-speech) (https://dev.vk.com/marusia/tts), максимум 1 024 символа.
 	//Поддерживается расстановка ударений с помощью '+'.
-	Tts string `json:"tts"`
+	Tts *string `json:"tts"`
 
 	//Кнопки (suggest), которые следует показать пользователю.
 	//Кнопки можно использовать как релевантные ответу ссылки или подсказки для продолжения разговора.
-	Buttons []*Button `json:"buttons"`
+	Buttons []*Button `json:"buttons,omitempty"`
 
 	//Признак конца разговора:
 	// • true — сессию следует завершить,
@@ -71,11 +122,11 @@ type Response struct {
 
 	//Описание карточки — сообщения с различным контентом.
 	//Подробнее о типах карточек и описание структур в специальном разделе https://dev.vk.com/marusia/cards.
-	Card *Card `json:"card"`
+	Card *Card `json:"card,omitempty"`
 
 	//Команды. Поле позволяет передать несколько сообщений в нужном порядке.
 	//На данный момент поддерживаются только карточки https://dev.vk.com/marusia/cards.
-	Commands []*string `json:"commands"`
+	Commands *[]string `json:"commands,omitempty"`
 }
 
 type Button struct {
@@ -109,6 +160,14 @@ type MarusyaRequest struct {
 	Request Request `json:"request"`
 	Session Session `json:"session"`
 	Version string  `json:"version"`
+	Meta    Meta    `json:"meta"`
+}
+
+type Meta struct {
+	ClientId string `json:"client_id"`
+	Locale   string `json:"locale"`
+	Timezone string `json:"timezone"`
+	CityRu   string `json:"_city_ru"`
 }
 
 type Request struct {
