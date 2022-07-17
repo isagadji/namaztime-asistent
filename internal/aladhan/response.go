@@ -7,6 +7,7 @@ type Response struct {
 }
 
 type Data struct {
+	//Timings map[string]string `json:"timings"`
 	Timings Timings `json:"timings"`
 	Date    Date    `json:"date"`
 	Meta    Meta    `json:"meta"`

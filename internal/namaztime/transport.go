@@ -31,7 +31,7 @@ func (t *Transport) Handler() http.Handler {
 	return r
 }
 
-func (t Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
+func (t *Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
 	var request *MarusyaRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -41,14 +41,14 @@ func (t Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() { _ = r.Body.Close() }()
 
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "*")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	msg, err := t.service.GetNamazTimeFromCity(request)
+	msg, err := t.service.GetNamazTimeMessage(request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	render.JSON(w, r, NewMarusyaResponse(msg, request))
 	return

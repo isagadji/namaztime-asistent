@@ -9,21 +9,18 @@ type Storage struct {
 }
 
 func NewStorage(db *sqlx.DB) *Storage {
-	db.MustExec(Schema)
+	db.MustExec(DDL)
 	return &Storage{db: db}
 }
 
-func (s Storage) getAzanTimeByCity(city string) (*AzanTime, error) {
+func (s *Storage) getTodayAzanTimeByCity(city string) (*AzanTime, error) {
 	azanTime := &AzanTime{}
-	err := s.db.Get(azanTime, "SELECT * FROM azan_time WHERE city=$1", city)
-	if err != nil {
-		return nil, err
-	}
+	err := s.db.Get(azanTime, "SELECT * FROM azan_time WHERE city=$1 LIMIT 1", city)
 
-	return azanTime, nil
+	return azanTime, err
 }
 
-func (s Storage) saveAzanTime(azanTime *AzanTime) error {
+func (s *Storage) saveAzanTime(azanTime *AzanTime) error {
 	queryString := "INSERT INTO azan_time (city, fajr, dhuhr, asr, maghrib, isha) " +
 		"VALUES (:city, :fajr, :dhuhr, :asr, :maghrib, :isha) " +
 		"ON CONFLICT (city) DO UPDATE " +

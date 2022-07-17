@@ -26,58 +26,66 @@ func NewService(aladhanService AladhanService, storage *Storage, logger zerolog.
 	}
 }
 
-func (s Service) GetNamazTimeFromCity(request *MarusyaRequest) (*string, error) {
-	azanTime, err := s.storage.getAzanTimeByCity(request.Meta.CityRu)
+func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) {
+	azanTime, err := s.storage.getTodayAzanTimeByCity(request.Meta.CityRu)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
 
-	if azanTime == nil {
-		if err = s.creatAndUpdate(request, azanTime); err != nil {
-			return nil, err
-		}
+	if errors.Is(err, sql.ErrNoRows) {
+		azanTime = s.refreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
 	}
-
-	if (time.Now().Year() == azanTime.UpdateAt.Year() && time.Now().YearDay() != azanTime.UpdateAt.YearDay()) ||
-		time.Now().Year() != azanTime.UpdateAt.Year() {
-		if err = s.creatAndUpdate(request, azanTime); err != nil {
-			return nil, err
-		}
-	}
-
-	s.logger.Info().Msg(azanTime.City)
 
 	timezone, err := time.LoadLocation(request.Meta.Timezone)
 	if err != nil {
 		return nil, err
 	}
+	s.logger.Info().Msg(timezone.String())
 	now := time.Now().In(timezone)
-	diff := now.Sub(azanTime.Fajr)
+	if now.Year() != azanTime.UpdateAt.Year() ||
+		(now.Year() == azanTime.UpdateAt.Year() && now.YearDay() != azanTime.UpdateAt.YearDay()) {
+		azanTime = s.refreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
+	}
 
-	s.logger.Info().Msg(diff.String())
+	var (
+		actual int = 0
+	)
 
-	//tmpl, err := template.New("namaz-time").Parse(namazTimeResponseTextTemplate)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//resultBuffer := &bytes.Buffer{}
-	//if err = tmpl.Execute(resultBuffer, namazTime); err != nil {
-	//	return nil, err
-	//}
-	//
-	//result := resultBuffer.String()
+	namazTextDto := &TextDto{
+		Title:       "",
+		TitleRu:     "",
+		Description: "",
+		Time:        "",
+		TimeLeft:    "",
+	}
 
-	//return &result, nil
-	return nil, nil
+	for k, a := range azanTime.getAzanTimes() {
+		diff := int(a.Sub(now))
+		if diff <= 0 {
+			continue
+		}
+
+		if actual == 0 {
+			actual = diff
+			namazTextDto = namazTextDto.New(k, a, a.Sub(now))
+			continue
+		}
+
+		if actual > diff {
+			actual = diff
+			namazTextDto = namazTextDto.New(k, a, a.Sub(now))
+			continue
+		}
+	}
+
+	return getMessageByTextDto(namazTextDto)
 }
 
-func (s Service) creatAndUpdate(request *MarusyaRequest, azanTime *AzanTime) error {
-	azanTime = s.aladhanService.GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone)
+func (s *Service) refreshAzanTime(c, tz string) *AzanTime {
+	azanTime := s.aladhanService.GetTimeByCity(c, tz)
+	if err := s.storage.saveAzanTime(azanTime); err != nil {
+		s.logger.Info().Msg(err.Error())
+	}
 
-	return s.storage.saveAzanTime(azanTime)
-}
-
-func checkTime(aTime time.Time) {
-
+	return azanTime
 }

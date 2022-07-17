@@ -22,28 +22,48 @@ func (s *Service) GetTimeByCity(city string, timezone string) *namaztime.AzanTim
 		return nil
 	}
 	date := response.Data.Date.Gregorian
-	timings := response.Data.Timings
 
 	year, _ := strconv.Atoi(date.Year)
 	month := time.Month(date.Month.Number)
 	day, _ := strconv.Atoi(date.Day)
 	location, _ := time.LoadLocation(timezone)
 
-	return &namaztime.AzanTime{
+	dateTime := NewDateTimeBuilder(year, month, day, location)
+
+	azanTime := &namaztime.AzanTime{
+		ID:       0,
 		City:     city,
 		UpdateAt: time.Now(),
-		Fajr:     prepareDateTime(year, month, day, timings.Fajr, location),
-		Dhuhr:    prepareDateTime(year, month, day, timings.Dhuhr, location),
-		Asr:      prepareDateTime(year, month, day, timings.Asr, location),
-		Maghrib:  prepareDateTime(year, month, day, timings.Maghrib, location),
-		Isha:     prepareDateTime(year, month, day, timings.Isha, location),
+		Fajr:     dateTime.prepareDateTime(response.Data.Timings.Fajr),
+		Dhuhr:    dateTime.prepareDateTime(response.Data.Timings.Dhuhr),
+		Asr:      dateTime.prepareDateTime(response.Data.Timings.Asr),
+		Maghrib:  dateTime.prepareDateTime(response.Data.Timings.Maghrib),
+		Isha:     dateTime.prepareDateTime(response.Data.Timings.Isha),
+	}
+
+	return azanTime
+}
+
+type DateTimeBuilder struct {
+	Year     int
+	Month    time.Month
+	Day      int
+	Location *time.Location
+}
+
+func NewDateTimeBuilder(year int, month time.Month, day int, location *time.Location) *DateTimeBuilder {
+	return &DateTimeBuilder{
+		Year:     year,
+		Month:    month,
+		Day:      day,
+		Location: location,
 	}
 }
 
-func prepareDateTime(year int, month time.Month, day int, t string, location *time.Location) time.Time {
+func (d *DateTimeBuilder) prepareDateTime(t string) time.Time {
 	rTime := strings.Split(t, ":")
 	hour, _ := strconv.Atoi(rTime[0])
 	minute, _ := strconv.Atoi(rTime[1])
 
-	return time.Date(year, month, day, hour, minute, 1, 0, location)
+	return time.Date(d.Year, d.Month, d.Day, hour, minute, 1, 0, d.Location)
 }
