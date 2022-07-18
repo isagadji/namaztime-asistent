@@ -70,35 +70,35 @@ func getMessageByTextDto(namazTextDto *TextDto) (*string, error) {
 }
 
 var TextsMap = map[string]*TextDto{
-	"Fajr": {
+	Fajr: {
 		Title:       "Fajr",
 		TitleRu:     "Фаджр",
 		Description: "утреннего",
 		Time:        "",
 		TimeLeft:    "",
 	},
-	"Dhuhr": {
+	Dhuhr: {
 		Title:       "Dhuhr",
 		TitleRu:     "Зухр",
 		Description: "обеденного",
 		Time:        "",
 		TimeLeft:    "",
 	},
-	"Asr": {
+	Asr: {
 		Title:       "Asr",
 		TitleRu:     "Аср",
 		Description: "послеобеденного",
 		Time:        "",
 		TimeLeft:    "",
 	},
-	"Maghrib": {
+	Maghrib: {
 		Title:       "Maghrib",
 		TitleRu:     "Магриб",
 		Description: "вечернего",
 		Time:        "",
 		TimeLeft:    "",
 	},
-	"Isha": {
+	Isha: {
 		Title:       "Isha",
 		TitleRu:     "Иша",
 		Description: "Ночного",
