@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"marusya/internal/marusya"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog"
@@ -24,14 +26,15 @@ func NewTransport(service *Service, logger zerolog.Logger) *Transport {
 
 func (t *Transport) Handler() http.Handler {
 	r := chi.NewRouter()
-	r.Post("/webhook", t.webHookHandler)
+	r.Post("/marusya", t.marusyaWebHook)
+	r.Post("/alisa", t.alisaWebHook)
 	return r
 }
 
-func (t *Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
+func (t *Transport) marusyaWebHook(w http.ResponseWriter, r *http.Request) {
 	t.logger.Debug().Msg(fmt.Sprintf("request: %#v", r))
 
-	var request *MarusyaRequest
+	var request *marusya.MarusyaRequest
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -50,9 +53,13 @@ func (t *Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	response := NewMarusyaResponse(msg, request)
+	response := marusya.NewMarusyaResponse(msg, request)
 	t.logger.Debug().Msg(fmt.Sprintf("response: %#v", r))
 
 	render.JSON(w, r, response)
 	return
+}
+
+func (t *Transport) alisaWebHook(w http.ResponseWriter, r *http.Request) {
+	t.logger.Debug().Msg(fmt.Sprintf("request: %#v", r))
 }

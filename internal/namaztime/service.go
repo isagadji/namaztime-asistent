@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"marusya/internal/marusya"
+
 	"github.com/rs/zerolog"
 )
 
@@ -26,7 +28,7 @@ func NewService(aladhanService AladhanService, storage *Storage, logger zerolog.
 	}
 }
 
-func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) {
+func (s *Service) GetNamazTimeMessage(request *marusya.MarusyaRequest) (*string, error) {
 	azanTime, err := s.storage.getTodayAzanTimeByCity(request.Meta.CityRu)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err

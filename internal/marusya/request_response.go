@@ -1,4 +1,4 @@
-package namaztime
+package marusya
 
 type MarusyaResponse struct {
 	//Данные для ответа пользователю.
