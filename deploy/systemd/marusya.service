@@ -1,14 +1,13 @@
 [Unit]
-Description=Marusya skill server
+Description=NamazTime server
 After=multi-user.target
 
 [Service]
 User=root
 Group=root
-ExecStart=/opt/marusya/marusya
-StandardOutput=append:/tmp/marusya.log
-StandardError=append:/tmp/marusya.log
+ExecStart=/opt/namaztime/namaztime server  --env-file="/opt/namaztime/.env"
+StandardOutput=append:/tmp/namaztime.log
+StandardError=append:/tmp/namaztime.log
 
 [Install]
 WantedBy=multi-user.target
-
