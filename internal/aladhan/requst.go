@@ -19,11 +19,11 @@ func NewRequest(city string, country string) *Request {
 	}
 }
 
-func (receiver Request) httpMethod() string {
+func (r Request) httpMethod() string {
 	return http.MethodGet
 }
 
-func (receiver Request) getApiMethod() string {
+func (r Request) getAPIMethod() string {
 	return "timingsByCity"
 }
 

@@ -21,10 +21,6 @@ func NewTransport(service *Service, logger zerolog.Logger) *Transport {
 	}
 }
 
-func NewHttpTransport() *http.Transport {
-	return &http.Transport{}
-}
-
 func (t *Transport) Handler() http.Handler {
 	r := chi.NewRouter()
 	r.Post("/webhook", t.webHookHandler)

@@ -17,11 +17,11 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var ErrStopped = errors.New("stopped")
+var errStopped = errors.New("stopped")
 
 type Server struct {
-	VkAppId   string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
-	MarusyaId string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
+	VKAppID   string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
+	MarusyaID string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
 	HTTPAddr  string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
 
 	Aladhan       aladhan.Flags `kong:"embed"`
@@ -62,7 +62,7 @@ func (s *Server) Run(kVars kong.Vars) error {
 		return http.ListenAndServe(s.HTTPAddr, router)
 	})
 
-	if err := gr.Wait(); err != nil && !errors.Is(err, ErrStopped) {
+	if err := gr.Wait(); err != nil && !errors.Is(err, errStopped) {
 		logger.Error().Msg(fmt.Sprintf("unexpected error: %v", err))
 	}
 

@@ -19,10 +19,10 @@ func NewMarusyaResponse(msg *string, r *MarusyaRequest) MarusyaResponse {
 			EndSession: false,
 		},
 		Session: Session{
-			SessionId: r.Session.SessionId,
-			UserId:    r.Session.UserId,
-			MessageId: r.Session.MessageId,
-			SkillId:   r.Session.SkillId,
+			SessionID: r.Session.SessionID,
+			UserID:    r.Session.UserID,
+			MessageID: r.Session.MessageID,
+			SkillID:   r.Session.SkillID,
 			AuthToken: r.Session.AuthToken,
 		},
 		Version: r.Version,
@@ -31,15 +31,15 @@ func NewMarusyaResponse(msg *string, r *MarusyaRequest) MarusyaResponse {
 
 type Session struct {
 	//Уникальный идентификатор сессии, максимум 64 символа.
-	SessionId string `json:"session_id"`
+	SessionID string `json:"session_id"`
 
 	//Идентификатор экземпляра приложения, в котором пользователь общается с Марусей, максимум 64 символа.
-	UserId string `json:"user_id"`
+	UserID string `json:"user_id"`
 
 	//Идентификатор сообщения в рамках сессии, максимум 8 символов. Инкрементируется с каждым следующим запросом.
-	MessageId int `json:"message_id"`
+	MessageID int `json:"message_id"`
 
-	SkillId   *string `json:"skill_id"`
+	SkillID   *string `json:"skill_id"`
 	AuthToken *string `json:"auth_token"`
 }
 
@@ -78,7 +78,7 @@ type Button struct {
 	//URL, который откроется при нажатии на кнопку, максимум 1 024 байта.
 	//Если свойство URL не указано, по нажатию на кнопку навыку будет отправлен текст кнопки.
 	//Пока кнопки с URL не поддерживаются в приложении VK.
-	Url string `json:"url"`
+	URL string `json:"url"`
 
 	//Любой JSON, который нужно отправить скиллу, если эта кнопка будет нажата, максимум 4 096 байт.
 	Payload *Payload `json:"payload"`
@@ -92,7 +92,7 @@ type Card struct {
 	Type string `json:"type"`
 
 	//ID изображения из раздела Медиафайлы в настройках скилла.
-	ImageId int `json:"image_id"`
+	ImageID int `json:"image_id"`
 }
 
 type TTS struct {
@@ -106,7 +106,7 @@ type MarusyaRequest struct {
 }
 
 type Meta struct {
-	ClientId string `json:"client_id"`
+	ClientID string `json:"client_id"`
 	Locale   string `json:"locale"`
 	Timezone string `json:"timezone"`
 	CityRu   string `json:"_city_ru"`

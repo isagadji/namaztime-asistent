@@ -20,8 +20,8 @@ func (c *Client) GetTimeByCity(city string) (*Response, error) {
 }
 
 func (c *Client) sendRequest(request *Request) (*Response, error) {
-	fullUrl := c.getFullUrl(request)
-	req, err := http.NewRequest(request.httpMethod(), fullUrl, nil)
+	fullURL := c.getFullURL(request)
+	req, err := http.NewRequest(request.httpMethod(), fullURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -41,6 +41,6 @@ func (c *Client) sendRequest(request *Request) (*Response, error) {
 	return response, nil
 }
 
-func (c *Client) getFullUrl(request *Request) string {
-	return c.Host + c.Path + request.getApiMethod() + request.string()
+func (c *Client) getFullURL(request *Request) string {
+	return c.Host + c.Path + request.getAPIMethod() + request.string()
 }

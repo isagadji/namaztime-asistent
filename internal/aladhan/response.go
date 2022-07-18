@@ -54,7 +54,7 @@ type Meta struct {
 	Longitude float64 `json:"longitude"`
 	Timezone  string  `json:"timezone"`
 	Method    struct {
-		Id     int    `json:"id"`
+		ID     int    `json:"id"`
 		Name   string `json:"name"`
 		Params struct {
 			Fajr int `json:"fajr"`
