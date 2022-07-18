@@ -63,7 +63,7 @@ func (s *Server) Run(kVars kong.Vars) error {
 	})
 
 	if err := gr.Wait(); err != nil && !errors.Is(err, ErrStopped) {
-		logger.Error().Msg(fmt.Sprintf("unexpected error: %w", err))
+		logger.Error().Msg(fmt.Sprintf("unexpected error: %v", err))
 	}
 
 	logger.Info().Msg("service gracefully stopped")
