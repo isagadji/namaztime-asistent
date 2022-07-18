@@ -21,11 +21,11 @@ jobs:
       - name: Build
         run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./builds/marusya ./cmd/main.go
 
-      - name: Install golint
-        run: go install golang.org/x/lint/golint@latest
-
-      - name: Run golint
-        run: golint ./...
+#      - name: Install golint
+#        run: go install golang.org/x/lint/golint@latest
+#
+#      - name: Run golint
+#        run: golint ./...
 
       - name: Test
         run: go test -v ./...
