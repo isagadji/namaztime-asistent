@@ -6,6 +6,9 @@ After=multi-user.target
 User=root
 Group=root
 ExecStart=/opt/marusya/marusya
+StandardOutput=/tmp/marusya.log
+StandardError=/tmp/marusya-err.log
+#SyslogIdentifier=marusya
 
 [Install]
 WantedBy=multi-user.target

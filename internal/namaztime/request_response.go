@@ -16,7 +16,7 @@ func NewMarusyaResponse(msg *string, r *MarusyaRequest) MarusyaResponse {
 		Response: Response{
 			Text:       msg,
 			Tts:        msg,
-			EndSession: false,
+			EndSession: true,
 		},
 		Session: Session{
 			SessionID: r.Session.SessionID,

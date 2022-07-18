@@ -67,6 +67,6 @@ func (s *Server) Run(kVars kong.Vars) error {
 		logger.Error().Msg(fmt.Sprintf("unexpected error: %v", err))
 	}
 
-	logger.Info().Msg("service gracefully stopped")
+	logger.Info().Msg("stopped")
 	return nil
 }
