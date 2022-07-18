@@ -37,10 +37,6 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    steps:
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
