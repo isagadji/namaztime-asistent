@@ -8,7 +8,20 @@ on:
 
 jobs:
 
+  analize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+
+      - name: Run golint
+        run: golint ./...
+
+      - name: Test
+        run: go test -v ./...
+
   build:
+    needs: prepare
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,14 +34,10 @@ jobs:
       - name: Build
         run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./builds/namaztime ./cmd/main.go
 
-#      - name: Install golint
-#        run: go install golang.org/x/lint/golint@latest
-#
-#      - name: Run golint
-#        run: golint ./...
-
-      - name: Test
-        run: go test -v ./...
+      - uses: actions/upload-artifact@v2
+        with:
+          name: namaztime
+          path: ./builds/namaztime
 
   deploy:
     needs: build
@@ -42,6 +51,10 @@ jobs:
 
       - name: Adding Known Hosts
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: namaztime
 
       - name: Deploy with rsync
         run: rsync -avz ./builds/namaztime ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/namaztime/namaztime
