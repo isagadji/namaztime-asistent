@@ -4,8 +4,9 @@ http://localhost:3000/webhook@8207853
 
 
 TODO:
-1. Add client for azan API
-2. Tests
+1. ~~Add client for azan API~~
+2. Setup deploy 
+3. Tests
 
 
 ### links

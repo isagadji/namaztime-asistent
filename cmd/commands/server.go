@@ -23,6 +23,7 @@ type Server struct {
 	VKAppID   string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
 	MarusyaID string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
 	HTTPAddr  string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
+	LogLevel  string `kong:"optional,name=log-level,env=LOG_LEVEL,default=info"`
 
 	Aladhan       aladhan.Flags `kong:"embed"`
 	PostgresFlags PostgresFlags `kong:"embed"`
@@ -31,7 +32,7 @@ type Server struct {
 func (s *Server) Run(kVars kong.Vars) error {
 	serviceName := kVars["serviceName"]
 	logger := httplog.NewLogger(serviceName, httplog.Options{
-		LogLevel: "debug",
+		LogLevel: s.LogLevel,
 		JSON:     true,
 	})
 	db, err := s.PostgresFlags.Init()
