@@ -47,5 +47,6 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.MCS_SECRET }}
           port: 22
           script: sudo systemctl restart namaztime.service
