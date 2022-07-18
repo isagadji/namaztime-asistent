@@ -21,7 +21,7 @@ jobs:
         run: go test -v ./...
 
   build:
-    needs: prepare
+    needs: analize
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
