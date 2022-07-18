@@ -24,11 +24,11 @@ func NewTransport(service *Service, logger zerolog.Logger) *Transport {
 
 func (t *Transport) Handler() http.Handler {
 	r := chi.NewRouter()
-	r.Post("/webhook", t.webHookHandler)
+	r.Post("/marusya", t.marusyaWebHook)
 	return r
 }
 
-func (t *Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
+func (t *Transport) marusyaWebHook(w http.ResponseWriter, r *http.Request) {
 	t.logger.Debug().Msg(fmt.Sprintf("request: %#v", r))
 
 	var request *MarusyaRequest
