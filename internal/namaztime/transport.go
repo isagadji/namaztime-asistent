@@ -2,6 +2,7 @@ package namaztime
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -28,7 +29,10 @@ func (t *Transport) Handler() http.Handler {
 }
 
 func (t *Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
+	t.logger.Debug().Msg(fmt.Sprintf("request: %#v", r))
+
 	var request *MarusyaRequest
+
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -46,6 +50,9 @@ func (t *Transport) webHookHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	render.JSON(w, r, NewMarusyaResponse(msg, request))
+	response := NewMarusyaResponse(msg, request)
+	t.logger.Debug().Msg(fmt.Sprintf("response: %#v", r))
+
+	render.JSON(w, r, response)
 	return
 }
