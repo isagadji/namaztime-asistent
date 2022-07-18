@@ -39,10 +39,10 @@ type AzanTime struct {
 
 func (t AzanTime) getAzanTimes() map[string]time.Time {
 	return map[string]time.Time{
-		"Fajr":    t.Fajr,
-		"Dhuhr":   t.Dhuhr,
-		"Asr":     t.Asr,
-		"Maghrib": t.Maghrib,
-		"Isha":    t.Isha,
+		Fajr:    t.Fajr,
+		Dhuhr:   t.Dhuhr,
+		Asr:     t.Asr,
+		Maghrib: t.Maghrib,
+		Isha:    t.Isha,
 	}
 }

@@ -19,7 +19,7 @@ jobs:
           go-version: 1.18
 
       - name: Build
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./builds/marusya ./cmd/main.go
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./builds/namaztime ./cmd/main.go
 
 #      - name: Install golint
 #        run: go install golang.org/x/lint/golint@latest
@@ -40,4 +40,12 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy with rsync
-        run: rsync -avz ./builds/marusya ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/marusya/marusya
+        run: rsync -avz ./builds/namaztime ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/namaztime/namaztime
+
+      - name: Restart service remote
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: 22
+          script: sudo systemctl restart namaztime.service

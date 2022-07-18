@@ -8,6 +8,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const (
+	Fajr    = "fajr"
+	Dhuhr   = "dhuhr"
+	Asr     = "asr"
+	Maghrib = "maghrib"
+	Isha    = "isha"
+)
+
 type Service struct {
 	aladhanService AladhanService
 	storage        *Storage
@@ -59,7 +67,8 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) 
 		TimeLeft:    "",
 	}
 
-	for k, a := range azanTime.getAzanTimes() {
+	azanTimes := azanTime.getAzanTimes()
+	for k, a := range azanTimes {
 		diff := int(a.Sub(now))
 		if diff <= 0 {
 			continue
@@ -76,6 +85,11 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) 
 			namazTextDto = namazTextDto.New(k, a, a.Sub(now))
 			continue
 		}
+	}
+
+	if actual == 0 {
+		fajr := azanTimes[Fajr]
+		namazTextDto = namazTextDto.New(Fajr, fajr, fajr.Sub(now))
 	}
 
 	return getMessageByTextDto(namazTextDto)
