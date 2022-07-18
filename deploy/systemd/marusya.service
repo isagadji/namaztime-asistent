@@ -1,14 +1,13 @@
 [Unit]
-Description=Marusya server
+Description=Marusya skill server
 After=multi-user.target
 
 [Service]
 User=root
 Group=root
 ExecStart=/opt/marusya/marusya
-StandardOutput=/tmp/marusya.log
-StandardError=/tmp/marusya-err.log
-#SyslogIdentifier=marusya
+StandardOutput=append:/tmp/marusya.log
+StandardError=append:/tmp/marusya.log
 
 [Install]
 WantedBy=multi-user.target
