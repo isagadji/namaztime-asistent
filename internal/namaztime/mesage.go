@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	namazTimeMessageTemplate = "До {{.Description}} намаза {{.TTS}} в {{.Time}}, осталось {{.TimeLeft}}"
+	namazTimeMessageTemplate    = "До {{.Description}} намаза {{.TitleRu}} в {{.Time}}, осталось {{.TimeLeft}}"
+	namazTimeMessageTemplateTTS = "До {{.Description}} намаза {{.TTS}} в {{.Time}}, осталось {{.TimeLeft}}"
 )
 
 type TextDto struct {
@@ -54,8 +55,8 @@ func fmtDurationToText(d time.Duration) string {
 	return fmt.Sprintf("%d %s и %d %s", h, hText, m, mText)
 }
 
-func getMessageByTextDto(namazTextDto *TextDto) (*string, error) {
-	tmpl, err := template.New("namaz-time").Parse(namazTimeMessageTemplate)
+func getTextByTextDtoAndTemplate(namazTextDto *TextDto, textTemplate string) (*string, error) {
+	tmpl, err := template.New("namaz-time").Parse(textTemplate)
 	if err != nil {
 		return nil, err
 	}

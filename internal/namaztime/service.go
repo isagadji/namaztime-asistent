@@ -34,7 +34,12 @@ func NewService(aladhanService AladhanService, storage *Storage, logger zerolog.
 	}
 }
 
-func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) {
+type Msg struct {
+	Text    *string
+	TTSText *string
+}
+
+func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
 	azanTime, err := s.storage.getTodayAzanTimeByCity(request.Meta.CityRu)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
@@ -62,6 +67,7 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) 
 	namazTextDto := &TextDto{
 		Title:       "",
 		TitleRu:     "",
+		TTS:         "",
 		Description: "",
 		Time:        "",
 		TimeLeft:    "",
@@ -92,7 +98,19 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*string, error) 
 		namazTextDto = namazTextDto.New(Fajr, fajr, fajr.Sub(now))
 	}
 
-	return getMessageByTextDto(namazTextDto)
+	text, err := getTextByTextDtoAndTemplate(namazTextDto, namazTimeMessageTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	ttsText, err := getTextByTextDtoAndTemplate(namazTextDto, namazTimeMessageTemplateTTS)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := &Msg{Text: text, TTSText: ttsText}
+
+	return msg, nil
 }
 
 func (s *Service) refreshAzanTime(c, tz string) *AzanTime {

@@ -11,11 +11,11 @@ type MarusyaResponse struct {
 	Version string `json:"version"`
 }
 
-func NewMarusyaResponse(msg *string, r *MarusyaRequest) MarusyaResponse {
+func NewMarusyaResponse(msg *Msg, r *MarusyaRequest) MarusyaResponse {
 	return MarusyaResponse{
 		Response: Response{
-			Text:       msg,
-			Tts:        msg,
+			Text:       msg.Text,
+			Tts:        msg.TTSText,
 			EndSession: true,
 		},
 		Session: Session{
