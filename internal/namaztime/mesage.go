@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	namazTimeMessageTemplate = "До {{.Description}} намаза {{.TitleRu}} в {{.Time}}, осталось {{.TimeLeft}}"
+	namazTimeMessageTemplate = "До {{.Description}} намаза {{.TTS}} в {{.Time}}, осталось {{.TimeLeft}}"
 )
 
 type TextDto struct {
@@ -17,6 +17,7 @@ type TextDto struct {
 	Description string
 	Time        string
 	TimeLeft    string
+	TTS         string
 }
 
 func (n *TextDto) New(title string, time time.Time, timeLeft time.Duration) *TextDto {
@@ -73,6 +74,7 @@ var TextsMap = map[string]*TextDto{
 	Fajr: {
 		Title:       "Fajr",
 		TitleRu:     "Фаджр",
+		TTS:         "Фаджр",
 		Description: "утреннего",
 		Time:        "",
 		TimeLeft:    "",
@@ -80,6 +82,7 @@ var TextsMap = map[string]*TextDto{
 	Dhuhr: {
 		Title:       "Dhuhr",
 		TitleRu:     "Зухр",
+		TTS:         "Зухр",
 		Description: "обеденного",
 		Time:        "",
 		TimeLeft:    "",
@@ -87,6 +90,7 @@ var TextsMap = map[string]*TextDto{
 	Asr: {
 		Title:       "Asr",
 		TitleRu:     "Аср",
+		TTS:         "`Аср",
 		Description: "послеобеденного",
 		Time:        "",
 		TimeLeft:    "",
@@ -94,6 +98,7 @@ var TextsMap = map[string]*TextDto{
 	Maghrib: {
 		Title:       "Maghrib",
 		TitleRu:     "Магриб",
+		TTS:         "М`агриб",
 		Description: "вечернего",
 		Time:        "",
 		TimeLeft:    "",
@@ -101,6 +106,7 @@ var TextsMap = map[string]*TextDto{
 	Isha: {
 		Title:       "Isha",
 		TitleRu:     "Иша",
+		TTS:         "`Иша",
 		Description: "Ночного",
 		Time:        "",
 		TimeLeft:    "",
