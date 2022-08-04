@@ -94,7 +94,7 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
 	}
 
 	if actual == 0 {
-		fajr := azanTimes[Fajr].Add((24 * time.Hour) + (5 * time.Minute))
+		fajr := azanTimes[Fajr].Add(24 * time.Hour)
 		namazTextDto = namazTextDto.New(Fajr, fajr, fajr.Sub(now))
 	}
 
