@@ -76,6 +76,9 @@ jobs:
 #          path: ./builds/namaztime
 #          key: namaztime
 
+      - name: list artifacts
+        run: ls -l ./builds/namaztime
+
       - name: Deploy with rsync
         run: rsync -avz ./builds/namaztime ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/namaztime/namaztime
 
