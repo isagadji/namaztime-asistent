@@ -28,8 +28,6 @@ func TestNewService(t *testing.T) {
 }
 
 func TestService_GetNamazTimeMessage(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 	request := &namaztime.MarusyaRequest{
 		Meta: namaztime.Meta{
 			CityRu:   "Москва",
@@ -63,12 +61,13 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 		t.Error("get expected text")
 	}
 
-	aladhanService := NewMockAladhanService(ctrl)
-	storage := NewMockDbStorage(ctrl)
-	service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
-
 	t.Run("namaz time cached", func(t *testing.T) {
 		t.Parallel()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		aladhanService := NewMockAladhanService(ctrl)
+		storage := NewMockDbStorage(ctrl)
+		service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
 		storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(&azanTime, nil)
 
 		result, err := service.GetNamazTimeMessage(request)
@@ -79,6 +78,11 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 
 	t.Run("namaz time not cached", func(t *testing.T) {
 		t.Parallel()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		aladhanService := NewMockAladhanService(ctrl)
+		storage := NewMockDbStorage(ctrl)
+		service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
 		storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(nil, sql.ErrNoRows)
 		aladhanService.EXPECT().GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone).Return(&azanTime)
 		storage.EXPECT().SaveAzanTime(&azanTime).Return(nil)
@@ -92,8 +96,6 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 }
 
 func TestService_RefreshAzanTime(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 	request := &namaztime.MarusyaRequest{
 		Meta: namaztime.Meta{
 			CityRu:   "Москва",
@@ -112,11 +114,12 @@ func TestService_RefreshAzanTime(t *testing.T) {
 		Isha:     now.Add(5 * time.Hour),
 	}
 
-	aladhanService := NewMockAladhanService(ctrl)
-	storage := NewMockDbStorage(ctrl)
-	service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
-
 	t.Run("refresh azan time", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		aladhanService := NewMockAladhanService(ctrl)
+		storage := NewMockDbStorage(ctrl)
+		service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
 		aladhanService.EXPECT().GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone).Return(&azanTime)
 		storage.EXPECT().SaveAzanTime(&azanTime).Return(nil)
 
