@@ -25,7 +25,7 @@ run:
 
 .Pony: test
 test:
-	CGO_ENABLED=0 go test ./...
+	CGO_ENABLED=0 go test -v ./...
 
 .Pony: run_db
 run_db:
