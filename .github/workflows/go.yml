@@ -41,11 +41,16 @@ jobs:
       - name: Build
         run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./builds/namaztime ./cmd/main.go
 
-      - name: Upload build result to cache
-        uses: actions/cache@v2
+      - uses: actions/upload-artifact@v3
         with:
+          name: namaztime
           path: ./builds/namaztime
-          key: namaztime
+
+#      - name: Upload build result to cache
+#        uses: actions/cache@v2
+#        with:
+#          path: ./builds/namaztime
+#          key: namaztime
 
   deploy:
     needs: build
@@ -60,11 +65,16 @@ jobs:
       - name: Adding Known Hosts
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Download from cache
-        uses: actions/cache@v2
+      - uses: actions/download-artifact@v3
         with:
+          name: namaztime
           path: ./builds/namaztime
-          key: namaztime
+
+#      - name: Download from cache
+#        uses: actions/cache@v2
+#        with:
+#          path: ./builds/namaztime
+#          key: namaztime
 
       - name: Deploy with rsync
         run: rsync -avz ./builds/namaztime ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/namaztime/namaztime
