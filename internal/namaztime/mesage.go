@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	namazTimeMessageTemplate    = "До {{.Description}} намаза {{.TitleRu}} в {{.Time}}, {{.LeftText}} {{.TimeLeft}}"
-	namazTimeMessageTemplateTTS = "До {{.Description}} намаза {{.TTS}} в {{.Time}}, {{.LeftText}} {{.TimeLeft}}"
+	MessageTemplate    = "До {{.Description}} намаза {{.TitleRu}} в {{.Time}}, {{.LeftText}} {{.TimeLeft}}"
+	MessageTemplateTTS = "До {{.Description}} намаза {{.TTS}} в {{.Time}}, {{.LeftText}} {{.TimeLeft}}"
 )
 
 var (
@@ -80,7 +80,7 @@ func getDeclensionByNumber(number int, declensionForms []string) string {
 	}
 }
 
-func getTextByTextDtoAndTemplate(namazTextDto *TextDto, textTemplate string) (*string, error) {
+func GetTextByTextDtoAndTemplate(namazTextDto *TextDto, textTemplate string) (*string, error) {
 	tmpl, err := template.New("namaz-time").Parse(textTemplate)
 	if err != nil {
 		return nil, err

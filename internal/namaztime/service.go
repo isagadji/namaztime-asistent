@@ -18,7 +18,7 @@ const (
 
 type Service struct {
 	aladhanService AladhanService
-	storage        *Storage
+	storage        DbStorage
 	logger         zerolog.Logger
 }
 
@@ -26,7 +26,12 @@ type AladhanService interface {
 	GetTimeByCity(city string, timezone string) *AzanTime
 }
 
-func NewService(aladhanService AladhanService, storage *Storage, logger zerolog.Logger) *Service {
+type DbStorage interface {
+	GetTodayAzanTimeByCity(city string) (*AzanTime, error)
+	SaveAzanTime(azanTime *AzanTime) error
+}
+
+func NewService(aladhanService AladhanService, storage DbStorage, logger zerolog.Logger) *Service {
 	return &Service{
 		aladhanService: aladhanService,
 		storage:        storage,
@@ -40,13 +45,13 @@ type Msg struct {
 }
 
 func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
-	azanTime, err := s.storage.getTodayAzanTimeByCity(request.Meta.CityRu)
+	azanTime, err := s.storage.GetTodayAzanTimeByCity(request.Meta.CityRu)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
 
 	if errors.Is(err, sql.ErrNoRows) {
-		azanTime = s.refreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
+		azanTime = s.RefreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
 	}
 
 	timezone, err := time.LoadLocation(request.Meta.Timezone)
@@ -57,7 +62,7 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
 	now := time.Now().In(timezone)
 	if now.Year() != azanTime.UpdateAt.Year() ||
 		(now.Year() == azanTime.UpdateAt.Year() && now.YearDay() != azanTime.UpdateAt.YearDay()) {
-		azanTime = s.refreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
+		azanTime = s.RefreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
 	}
 
 	var (
@@ -98,12 +103,12 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
 		namazTextDto = namazTextDto.New(Fajr, fajr, fajr.Sub(now))
 	}
 
-	text, err := getTextByTextDtoAndTemplate(namazTextDto, namazTimeMessageTemplate)
+	text, err := GetTextByTextDtoAndTemplate(namazTextDto, MessageTemplate)
 	if err != nil {
 		return nil, err
 	}
 
-	ttsText, err := getTextByTextDtoAndTemplate(namazTextDto, namazTimeMessageTemplateTTS)
+	ttsText, err := GetTextByTextDtoAndTemplate(namazTextDto, MessageTemplateTTS)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +118,9 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
 	return msg, nil
 }
 
-func (s *Service) refreshAzanTime(c, tz string) *AzanTime {
+func (s *Service) RefreshAzanTime(c, tz string) *AzanTime {
 	azanTime := s.aladhanService.GetTimeByCity(c, tz)
-	if err := s.storage.saveAzanTime(azanTime); err != nil {
+	if err := s.storage.SaveAzanTime(azanTime); err != nil {
 		s.logger.Info().Msg(err.Error())
 	}
 
