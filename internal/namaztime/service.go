@@ -3,6 +3,7 @@ package namaztime
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -58,8 +59,9 @@ func (s *Service) GetNamazTimeMessage(request *MarusyaRequest) (*Msg, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.logger.Info().Msg(timezone.String())
 	now := time.Now().In(timezone)
+	s.logger.Info().Msg(fmt.Sprintf("%#v", azanTime))
+	s.logger.Info().Msg(fmt.Sprintf("%#v", now))
 	if now.Year() != azanTime.UpdateAt.Year() ||
 		(now.Year() == azanTime.UpdateAt.Year() && now.YearDay() != azanTime.UpdateAt.YearDay()) {
 		azanTime = s.RefreshAzanTime(request.Meta.CityRu, request.Meta.Timezone)
