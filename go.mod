@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/httplog v0.2.4
 	github.com/go-chi/render v1.0.1
 	github.com/gojek/heimdall/v7 v7.0.2
+	github.com/golang/mock v1.6.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.2.0

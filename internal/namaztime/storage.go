@@ -13,14 +13,14 @@ func NewStorage(db *sqlx.DB) *Storage {
 	return &Storage{db: db}
 }
 
-func (s *Storage) getTodayAzanTimeByCity(city string) (*AzanTime, error) {
+func (s *Storage) GetTodayAzanTimeByCity(city string) (*AzanTime, error) {
 	azanTime := &AzanTime{}
 	err := s.db.Get(azanTime, "SELECT * FROM azan_time WHERE city=$1 LIMIT 1", city)
 
 	return azanTime, err
 }
 
-func (s *Storage) saveAzanTime(azanTime *AzanTime) error {
+func (s *Storage) SaveAzanTime(azanTime *AzanTime) error {
 	queryString := "INSERT INTO azan_time (city, fajr, dhuhr, asr, maghrib, isha) " +
 		"VALUES (:city, :fajr, :dhuhr, :asr, :maghrib, :isha) " +
 		"ON CONFLICT (city) DO UPDATE " +
