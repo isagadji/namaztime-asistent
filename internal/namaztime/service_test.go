@@ -64,6 +64,7 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		aladhanService := NewMockAladhanService(ctrl)
+		aladhanService.EXPECT().GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone).Return(&azanTime)
 		storage := NewMockDbStorage(ctrl)
 		storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(&azanTime, nil)
 		service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
