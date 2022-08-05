@@ -14,16 +14,19 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"golang.org/x/sync/errgroup"
 )
 
 var errStopped = errors.New("stopped")
 
 type Server struct {
-	VKAppID   string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
-	MarusyaID string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
-	HTTPAddr  string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
-	LogLevel  string `kong:"optional,name=log-level,env=LOG_LEVEL,default=info"`
+	VKAppID        string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
+	MarusyaID      string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
+	HTTPAddr       string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
+	HTTPMetricAddr string `kong:"required,name=http-metric-addr,env=HTTP_METRIC_ADDR,group='HTTP metrics server'"`
+	LogLevel       string `kong:"optional,name=log-level,env=LOG_LEVEL,default=info"`
 
 	Aladhan       aladhan.Flags `kong:"embed"`
 	PostgresFlags PostgresFlags `kong:"embed"`
@@ -61,6 +64,14 @@ func (s *Server) Run(kVars kong.Vars) error {
 		router.Mount("/", transport.Handler())
 
 		return http.ListenAndServe(s.HTTPAddr, router)
+	})
+
+	gr.Go(func() error {
+		router := chi.NewRouter()
+		router.Use(httplog.RequestLogger(logger))
+		router.Mount("/metrics", promhttp.Handler())
+
+		return http.ListenAndServe(s.HTTPMetricAddr, router)
 	})
 
 	if err := gr.Wait(); err != nil && !errors.Is(err, errStopped) {
