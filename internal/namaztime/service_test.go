@@ -1,6 +1,7 @@
 package namaztime_test
 
 import (
+	"database/sql"
 	"os"
 	"reflect"
 	"testing"
@@ -33,7 +34,12 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 			Timezone: "Europe/Moscow",
 		},
 	}
-	now := time.Now()
+	loc, err := time.LoadLocation(request.Meta.Timezone)
+	if err != nil {
+		t.Error("err location")
+	}
+
+	now := time.Now().In(loc)
 	azanTime := namaztime.AzanTime{
 		ID:       1,
 		City:     "Москва",
@@ -60,36 +66,30 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 		t.Error("get expected text")
 	}
 
-	t.Run("namaz time cached", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		aladhanService := NewMockAladhanService(ctrl)
-		aladhanService.EXPECT().GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone).Return(&azanTime)
-		storage := NewMockDbStorage(ctrl)
-		storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(&azanTime, nil)
-		service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	aladhanService := NewMockAladhanService(ctrl)
+	storage := NewMockDbStorage(ctrl)
+	service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
 
+	t.Run("namaz time cached", func(t *testing.T) {
+		storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(&azanTime, nil)
 		result, err := service.GetNamazTimeMessage(request)
 
 		assert.Nil(t, err)
 		assert.Equal(t, *expected, *result.Text)
 	})
 
-	//t.Run("namaz time not cached", func(t *testing.T) {
-	//	ctrl := gomock.NewController(t)
-	//	defer ctrl.Finish()
-	//	aladhanService := NewMockAladhanService(ctrl)
-	//	aladhanService.EXPECT().GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone).Return(&azanTime)
-	//	storage := NewMockDbStorage(ctrl)
-	//	storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(nil, sql.ErrNoRows)
-	//	storage.EXPECT().SaveAzanTime(&azanTime).Return(nil)
-	//	service := namaztime.NewService(aladhanService, storage, zerolog.New(os.Stderr))
-	//
-	//	result, err := service.GetNamazTimeMessage(request)
-	//
-	//	assert.Nil(t, err)
-	//	assert.Equal(t, *expected, *result.Text)
-	//})
+	t.Run("namaz time not cached", func(t *testing.T) {
+		aladhanService.EXPECT().GetTimeByCity(request.Meta.CityRu, request.Meta.Timezone).Return(&azanTime)
+		storage.EXPECT().GetTodayAzanTimeByCity(request.Meta.CityRu).Return(nil, sql.ErrNoRows)
+		storage.EXPECT().SaveAzanTime(&azanTime).Return(nil)
+
+		result, err := service.GetNamazTimeMessage(request)
+
+		assert.Nil(t, err)
+		assert.Equal(t, *expected, *result.Text)
+	})
 
 }
 
