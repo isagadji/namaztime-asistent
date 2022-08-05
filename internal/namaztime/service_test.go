@@ -62,7 +62,6 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 	}
 
 	t.Run("namaz time cached", func(t *testing.T) {
-		t.Parallel()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		aladhanService := NewMockAladhanService(ctrl)
@@ -77,7 +76,6 @@ func TestService_GetNamazTimeMessage(t *testing.T) {
 	})
 
 	t.Run("namaz time not cached", func(t *testing.T) {
-		t.Parallel()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		aladhanService := NewMockAladhanService(ctrl)
