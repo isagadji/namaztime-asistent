@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"marusya/internal/aladhan"
 	"marusya/internal/namaztime"
@@ -14,6 +15,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"golang.org/x/sync/errgroup"
@@ -22,11 +25,11 @@ import (
 var errStopped = errors.New("stopped")
 
 type Server struct {
-	VKAppID        string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
-	MarusyaID      string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
-	HTTPAddr       string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
-	HTTPMetricAddr string `kong:"required,name=http-metric-addr,env=HTTP_METRIC_ADDR,group='HTTP metrics server'"`
-	LogLevel       string `kong:"optional,name=log-level,env=LOG_LEVEL,default=info"`
+	VKAppID         string `kong:"required,name=vk-app-id,env=VK_APP_ID"`
+	MarusyaID       string `kong:"required,name=namaztime-id,env=MARUSYA_ID"`
+	HTTPAddr        string `kong:"required,name=http-addr,env=HTTP_ADDR,group='HTTP server'"`
+	HTTPMetricsAddr string `kong:"required,name=http-metrics-addr,env=HTTP_METRICS_ADDR,group='HTTP metrics server'"`
+	LogLevel        string `kong:"optional,name=log-level,env=LOG_LEVEL,default=info"`
 
 	Aladhan       aladhan.Flags `kong:"embed"`
 	PostgresFlags PostgresFlags `kong:"embed"`
@@ -53,6 +56,7 @@ func (s *Server) Run(kVars kong.Vars) error {
 
 		router.Use(httplog.RequestLogger(logger))
 		router.Use(middleware.Heartbeat("/ping"))
+		router.Use(prometheusMiddleware)
 
 		router.Use(cors.Handler(cors.Options{
 			AllowedOrigins:   []string{"*"},
@@ -71,7 +75,7 @@ func (s *Server) Run(kVars kong.Vars) error {
 		router.Use(httplog.RequestLogger(logger))
 		router.Mount("/metrics", promhttp.Handler())
 
-		return http.ListenAndServe(s.HTTPMetricAddr, router)
+		return http.ListenAndServe(s.HTTPMetricsAddr, router)
 	})
 
 	if err := gr.Wait(); err != nil && !errors.Is(err, errStopped) {
@@ -80,4 +84,33 @@ func (s *Server) Run(kVars kong.Vars) error {
 
 	logger.Info().Msg("stopped")
 	return nil
+}
+
+func prometheusMiddleware(next http.Handler) http.Handler {
+	var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "http_response_time_seconds",
+		Help:    "Duration of HTTP requests.",
+		Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	}, []string{"path"})
+
+	_ = prometheus.Register(httpDuration)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		next.ServeHTTP(w, r)
+
+		duration := time.Since(start)
+		path := getRoutePattern(r)
+		httpDuration.WithLabelValues(path).Observe(duration.Seconds())
+	})
+}
+
+func getRoutePattern(r *http.Request) string {
+	reqContext := chi.RouteContext(r.Context())
+	if pattern := reqContext.RoutePattern(); pattern != "" {
+		return pattern
+	}
+
+	return "undefined"
 }
