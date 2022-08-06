@@ -1,8 +1,10 @@
-name: Go
+name: Deploy to prod
 
 on:
   push:
-    branches: [ "main" ]
+    tags:
+      - 'v*'
+#    branches: [ "main" ]
 #  pull_request:
 #    branches: [ "main" ]
 
@@ -81,5 +83,5 @@ jobs:
           key: ${{ secrets.MCS_SECRET }}
           port: 22
           script: |
-            sudo systemctl restart namaztime.service
             sudo chmod +x /opt/namaztime/namaztime
+            sudo systemctl restart namaztime.service
