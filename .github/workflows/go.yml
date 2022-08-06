@@ -77,7 +77,7 @@ jobs:
 #          key: namaztime
 
       - name: check artifact
-        run: file ./builds/namaztime
+        run: file ./builds/namaztime/namaztime
 
       - name: list artifact
         run: ls ./builds/namaztime
