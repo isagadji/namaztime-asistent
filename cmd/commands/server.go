@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"marusya/internal/aladhan"
+	"marusya/internal/metrics"
 	"marusya/internal/namaztime"
 
 	"github.com/alecthomas/kong"
@@ -15,8 +15,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"golang.org/x/sync/errgroup"
@@ -56,7 +54,7 @@ func (s *Server) Run(kVars kong.Vars) error {
 
 		router.Use(httplog.RequestLogger(logger))
 		router.Use(middleware.Heartbeat("/ping"))
-		router.Use(prometheusMiddleware)
+		router.Use(metrics.HTTPDurationMiddleware)
 
 		router.Use(cors.Handler(cors.Options{
 			AllowedOrigins:   []string{"*"},
@@ -84,33 +82,4 @@ func (s *Server) Run(kVars kong.Vars) error {
 
 	logger.Info().Msg("stopped")
 	return nil
-}
-
-func prometheusMiddleware(next http.Handler) http.Handler {
-	var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "http_response_time_seconds",
-		Help:    "Duration of HTTP requests.",
-		Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
-	}, []string{"path"})
-
-	_ = prometheus.Register(httpDuration)
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		next.ServeHTTP(w, r)
-
-		duration := time.Since(start)
-		path := getRoutePattern(r)
-		httpDuration.WithLabelValues(path).Observe(duration.Seconds())
-	})
-}
-
-func getRoutePattern(r *http.Request) string {
-	reqContext := chi.RouteContext(r.Context())
-	if pattern := reqContext.RoutePattern(); pattern != "" {
-		return pattern
-	}
-
-	return "undefined"
 }
