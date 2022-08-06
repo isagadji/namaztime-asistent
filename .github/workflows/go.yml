@@ -2,9 +2,7 @@ name: Deploy to prod
 
 on:
   push:
-    tags:
-      - 'v*'
-#    branches: [ "main" ]
+    branches: [ "main" ]
 #  pull_request:
 #    branches: [ "main" ]
 
