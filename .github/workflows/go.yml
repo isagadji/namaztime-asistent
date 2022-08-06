@@ -44,7 +44,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: namaztime
-          path: ./builds/namaztime
+          path: ./builds/
 
 #      - name: Upload build result to cache
 #        uses: actions/cache@v2
@@ -76,7 +76,7 @@ jobs:
 #          path: ./builds/namaztime
 #          key: namaztime
 
-      - name: list artifacts
+      - name: check artifact
         run: file ./builds/namaztime
 
       - name: Deploy with rsync
