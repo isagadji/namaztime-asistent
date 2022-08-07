@@ -37,7 +37,7 @@ type AzanTime struct {
 	Isha     time.Time `db:"isha"`
 }
 
-func (t AzanTime) getAzanTimes() map[string]time.Time {
+func (t *AzanTime) getAzanTimes() map[string]time.Time {
 	return map[string]time.Time{
 		Fajr:    t.Fajr,
 		Dhuhr:   t.Dhuhr,
